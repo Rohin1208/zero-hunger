@@ -10,3 +10,9 @@ CREATE TABLE food_listings (
     expiry TIMESTAMP,
     restaurant_id INTEGER REFERENCES users(id)
 );
+CREATE TABLE requests (
+    id SERIAL PRIMARY KEY,
+    food_id INTEGER REFERENCES food_listings(id),
+    ngo_id INTEGER REFERENCES users(id),
+    status VARCHAR(20) DEFAULT 'pending'
+);
