@@ -13,3 +13,6 @@ INSERT INTO food_listings (food_name, quantity, expiry, restaurant_id) VALUES
  INSERT INTO requests (food_id, ngo_id, status) VALUES
 (15, 13, 'pending'),
 (16, 14, 'pending');
+
+INSERT INTO pickups (request_id, volunteer_name, pickup_time) VALUES
+(1, 'Rahul', NOW());
