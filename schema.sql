@@ -16,3 +16,9 @@ CREATE TABLE requests (
     ngo_id INTEGER REFERENCES users(id),
     status VARCHAR(20) DEFAULT 'pending'
 );
+CREATE TABLE pickups (
+    id SERIAL PRIMARY KEY,
+    request_id INTEGER REFERENCES requests(id),
+    volunteer_name VARCHAR(100),
+    pickup_time TIMESTAMP
+);
