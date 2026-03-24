@@ -16,3 +16,14 @@ INSERT INTO food_listings (food_name, quantity, expiry, restaurant_id) VALUES
 
 INSERT INTO pickups (request_id, volunteer_name, pickup_time) VALUES
 (1, 'Rahul', NOW());
+
+SELECT 
+    r.name AS restaurant,
+    f.food_name,
+    n.name AS ngo,
+    p.volunteer_name
+FROM pickups p
+JOIN requests req ON p.request_id = req.id
+JOIN food_listings f ON req.food_id = f.id
+JOIN users r ON f.restaurant_id = r.id
+JOIN users n ON req.ngo_id = n.id;
