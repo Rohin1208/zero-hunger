@@ -10,12 +10,26 @@ INSERT INTO food_listings (food_name, quantity, expiry, restaurant_id) VALUES
 ('Burger', 5, NOW() + INTERVAL '3 hours',
  (SELECT id FROM users WHERE name = 'Burger Hub'));
 
- INSERT INTO requests (food_id, ngo_id, status) VALUES
-(15, 13, 'pending'),
-(16, 14, 'pending');
+INSERT INTO requests (food_id, ngo_id, status) VALUES
+(
+  (SELECT id FROM food_listings WHERE food_name = 'Pizza' LIMIT 1),
+  (SELECT id FROM users WHERE name = 'Helping NGO' LIMIT 1),
+  'pending'
+),
+(
+  (SELECT id FROM food_listings WHERE food_name = 'Burger' LIMIT 1),
+  (SELECT id FROM users WHERE name = 'Food Rescue' LIMIT 1),
+  'pending'
+);
 
 INSERT INTO pickups (request_id, volunteer_name, pickup_time) VALUES
-(1, 'Rahul', NOW());
+(
+  (SELECT id FROM requests 
+   WHERE ngo_id = (SELECT id FROM users WHERE name = 'Helping NGO' LIMIT 1)
+   ORDER BY id DESC LIMIT 1),
+  'Rahul',
+  NOW()
+);
 
 SELECT 
     r.name AS restaurant,
