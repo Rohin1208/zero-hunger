@@ -49,3 +49,16 @@ WHERE status = 'pending';
 -- Expiring food (next 2 hours)
 SELECT * FROM food_listings
 WHERE expiry <= NOW() + INTERVAL '2 hours';
+
+-- Aggregation queries
+
+-- Requests per NGO
+SELECT 
+    u.name AS ngo,
+    COUNT(*) AS total_requests
+FROM requests r
+JOIN users u ON r.ngo_id = u.id
+GROUP BY u.name;
+
+-- Total food quantity
+SELECT SUM(quantity) AS total_food FROM food_listings;
