@@ -41,3 +41,11 @@ JOIN requests req ON p.request_id = req.id
 JOIN food_listings f ON req.food_id = f.id
 JOIN users r ON f.restaurant_id = r.id
 JOIN users n ON req.ngo_id = n.id;
+
+-- Pending requests
+SELECT * FROM requests
+WHERE status = 'pending';
+
+-- Expiring food (next 2 hours)
+SELECT * FROM food_listings
+WHERE expiry <= NOW() + INTERVAL '2 hours';
