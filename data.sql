@@ -62,3 +62,11 @@ GROUP BY u.name;
 
 -- Total food quantity
 SELECT SUM(quantity) AS total_food FROM food_listings;
+
+UPDATE requests
+SET status = 'accepted'
+WHERE id = (
+    SELECT id FROM requests
+    ORDER BY id ASC
+    LIMIT 1
+);
