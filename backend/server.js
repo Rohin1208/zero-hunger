@@ -28,6 +28,23 @@ app.get("/food", async (req, res) => {
     res.status(500).send("Error fetching food");
   }
 });
+
+// ➕ Add food (POST)
+app.post("/food", async (req, res) => {
+  const { food_name, quantity, expiry, restaurant_id } = req.body;
+
+  try {
+    const result = await pool.query(
+      "INSERT INTO food_listings (food_name, quantity, expiry, restaurant_id) VALUES ($1,$2,$3,$4) RETURNING *",
+      [food_name, quantity, expiry, restaurant_id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error adding food");
+  }
+});
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
