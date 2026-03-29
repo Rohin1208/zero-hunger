@@ -45,6 +45,20 @@ app.post("/food", async (req, res) => {
   }
 });
 
+app.post("/request", async (req, res) => {
+  const { food_id, ngo_id } = req.body;
+
+  try {
+    const result = await pool.query(
+      "INSERT INTO requests (food_id, ngo_id) VALUES ($1,$2) RETURNING *",
+      [food_id, ngo_id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error creating request");
+  }
+});
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
