@@ -44,7 +44,7 @@ app.post("/food", async (req, res) => {
     res.status(500).send("Error adding food");
   }
 });
-
+// NGO requests food
 app.post("/request", async (req, res) => {
   const { food_id, ngo_id } = req.body;
 
@@ -59,6 +59,27 @@ app.post("/request", async (req, res) => {
     res.status(500).send("Error creating request");
   }
 });
+
+// ✅ Accept request
+app.put("/request/:id/accept", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "UPDATE requests SET status = 'accepted' WHERE id = $1 AND status = 'pending' RETURNING *",
+      [req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).send("Request already accepted/rejected or not found");
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error updating request");
+  }
+});
+
+
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
