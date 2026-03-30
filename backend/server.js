@@ -79,6 +79,18 @@ app.put("/request/:id/accept", async (req, res) => {
   }
 });
 
+// 📦 View pending requests
+app.get("/requests/pending", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM requests WHERE status = 'pending'"
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching requests");
+  }
+});
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");
