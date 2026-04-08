@@ -92,18 +92,45 @@ app.post("/request", authenticate, async (req, res) => {
     return res.status(403).send("Only NGOs can request food");
 
   const { food_id } = req.body;
+  const client = await pool.connect(); // ← grab a dedicated connection
+
   try {
-    const result = await pool.query(
-      "INSERT INTO requests (food_id, ngo_id) VALUES ($1,$2) RETURNING *",
-      [food_id, req.user.id] // ← uses token, not body
+    await client.query("BEGIN"); // ← start transaction
+
+    // Lock this food row so no one else can touch it
+    const food = await client.query(
+      "SELECT * FROM food_listings WHERE id = $1 AND quantity > 0 FOR UPDATE",
+      [food_id]
     );
+
+    if (food.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(409).send("Food unavailable or already claimed");
+    }
+
+    // Decrement quantity
+    await client.query(
+      "UPDATE food_listings SET quantity = quantity - 1 WHERE id = $1",
+      [food_id]
+    );
+
+    // Create the request
+    const result = await client.query(
+      "INSERT INTO requests (food_id, ngo_id) VALUES ($1,$2) RETURNING *",
+      [food_id, req.user.id]
+    );
+
+    await client.query("COMMIT"); // ← everything worked, save it
     res.json(result.rows[0]);
+
   } catch (err) {
+    await client.query("ROLLBACK"); // ← something failed, undo everything
     console.error(err);
     res.status(500).send("Error creating request");
+  } finally {
+    client.release(); // ← always release the connection back to pool
   }
 });
-
 // Accept request — restaurants only
 app.put("/request/:id/accept", authenticate, async (req, res) => {
   if (req.user.role !== "restaurant")
