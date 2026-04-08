@@ -2,6 +2,7 @@ const express = require("express");
 const { Pool } = require("pg");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const cron = require("node-cron");
 
 const app = express();
 app.use(cors());
@@ -161,6 +162,23 @@ app.get("/requests/pending", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Error fetching requests");
+  }
+});
+
+// ── Cron Job — archive expired food every 15 mins ──────
+cron.schedule("*/15 * * * *", async () => {
+  try {
+    const result = await pool.query(
+      `UPDATE food_listings 
+       SET quantity = 0 
+       WHERE expiry < NOW() AND quantity > 0
+       RETURNING *`
+    );
+    if (result.rows.length > 0) {
+      console.log(`Expired ${result.rows.length} food listing(s)`);
+    }
+  } catch (err) {
+    console.error("Cron error:", err);
   }
 });
 
