@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 const authenticate = require("../middleware/auth");
+const { validateFood, checkValidation } = require("../middleware/validate");
 
 // Get all food listings (public)
 router.get("/", async (req, res) => {
@@ -15,7 +16,7 @@ router.get("/", async (req, res) => {
 });
 
 // Add food — restaurants only
-router.post("/", authenticate, async (req, res) => {
+router.post("/", authenticate, validateFood, checkValidation, async (req, res) => {
   if (req.user.role !== "restaurant")
     return res.status(403).send("Only restaurants can post food");
 
