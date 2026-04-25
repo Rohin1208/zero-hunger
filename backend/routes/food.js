@@ -32,4 +32,41 @@ router.post("/", authenticate, async (req, res) => {
   }
 });
 
+router.get("/nearby/:ngo_id", async (req, res) => {
+  const { ngo_id } = req.params;
+  const radius_km = req.query.radius || 5; // default 5km
+
+  try {
+    const result = await pool.query(
+      `SELECT 
+        f.id,
+        f.food_name,
+        f.quantity,
+        f.expiry,
+        u.name AS restaurant,
+        ROUND(
+          ST_Distance(
+            ngo.location,
+            u.location
+          )::numeric / 1000, 2
+        ) AS distance_km
+       FROM food_listings f
+       JOIN users u ON f.restaurant_id = u.id
+       JOIN users ngo ON ngo.id = $1
+       WHERE f.quantity > 0
+         AND f.expiry > NOW()
+         AND ST_DWithin(
+           ngo.location,
+           u.location,
+           $2 * 1000
+         )
+       ORDER BY distance_km ASC`,
+      [ngo_id, radius_km]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error fetching nearby food");
+  }
+});
 module.exports = router;
