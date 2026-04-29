@@ -18,7 +18,10 @@ router.post("/login", async (req, res) => {
       { id: result.rows[0].id, role: result.rows[0].role },
       SECRET
     );
-    res.json({ token });
+    res.json({ 
+      token,
+      userId: result.rows[0].id 
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send("Login error");
